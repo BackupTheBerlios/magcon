@@ -22,3 +22,5 @@
 #define FLD_MAIN		5000
 #define FLD_NAME		5001
 #define LST_DBLST		6000
+#define LST_BAUD		6001
+#define LST_TIMEOUT		6002

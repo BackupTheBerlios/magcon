@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.6 2003/02/17 14:52:56 niki Exp $ */
+/* $Id: magellan.c,v 1.7 2003/02/19 20:58:17 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -99,7 +99,8 @@ void get_mag_id(void){
 			get_field(msg,field,512,4);
 			StrCat(field,"  ");
 			get_field(msg,field+StrLen(field),512-StrLen(field),3);
-			WinDrawChars(field,StrLen(field),2,105);
+			FrmCustomAlert(INF_DLG1,"Found Magellan:",field," ");
+			/*WinDrawChars(field,StrLen(field),2,105);*/
 		} else {
 			FrmCustomAlert(ALM_DLG1,"Could not get Magellan ID"," "," ");
 		}
