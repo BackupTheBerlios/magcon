@@ -6,8 +6,12 @@ MENU ID MainMenu
 BEGIN
 	PULLDOWN "Action"
 	BEGIN
-		MENUITEM "Get Id" ID MainMenuGetId "i"
-		MENUITEM "Get Track" ID MainMenuGetTrack "t"
+		MENUITEM "Get GPS Ident" ID MainMenuGetId "i"
+		MENUITEM "Download Track" ID MainMenuGetTrack "t"
+		MENUITEM "Download Waypts" ID MainMenuGetWaypts "w"
+		MENUITEM "Download Route" ID MainMenuGetRoute "r"
+		MENUITEM "Upload DB" ID MainMenuUpload "u"
+
 	END
 	PULLDOWN "DB"
 	BEGIN
@@ -26,16 +30,19 @@ BEGIN
 	TITLE "MagCon"
 	FIELD ID FLD_MAIN AT (2 15 155 50) USABLE NONEDITABLE MULTIPLELINES MAXCHARS 250
 	LABEL "Baud" AUTOID AT (2 PREVBOTTOM+4)
-	POPUPTRIGGER "" ID TRIG_BAUD AT(PREVRIGHT+4 PREVTOP 50 AUTO) LEFTANCHOR
-	LIST "4800" "9600" "19200" "57600" "115200" ID LST_BAUD AT (PREVLEFT PREVTOP 50 AUTO) NONUSABLE VISIBLEITEMS 4
+	POPUPTRIGGER "" ID TRIG_BAUD AT(28 PREVTOP 50 AUTO) LEFTANCHOR
+	LIST "1200" "4800" "9600" "19200" "57600" "115200" ID LST_BAUD AT (PREVLEFT PREVTOP 50 AUTO) NONUSABLE VISIBLEITEMS 6
 	POPUPLIST ID TRIG_BAUD LST_BAUD
-	LABEL "Timeout" AUTOID AT (PREVRIGHT+4 PREVTOP)
+	LABEL "Timeout" AUTOID AT (PREVRIGHT+8 PREVTOP)
 	LABEL "1/x sec" AUTOID AT (PREVLEFT PREVBOTTOM+4)
 	POPUPTRIGGER "" ID TRIG_TIMEOUT AT (PREVRIGHT+4 PREVTOP-PREVHEIGHT-4 20 AUTO)
-	LIST "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" ID LST_TIMEOUT AT (PREVLEFT PREVTOP 20 20) NONUSABLE VISIBLEITEMS 4
+	LIST "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" ID LST_TIMEOUT AT (PREVLEFT PREVTOP 20 20) NONUSABLE VISIBLEITEMS 6
 	POPUPLIST ID TRIG_TIMEOUT LST_TIMEOUT
-	BUTTON "Get Id" ID BTN_ID AT (2 130 AUTO AUTO)
-	BUTTON "Get Track" ID BTN_TRK AT (2 PREVBOTTOM+4 AUTO AUTO)
+	LABEL "Action" AUTOID AT (2 105)
+	POPUPTRIGGER "" ID TRIG_ACTION AT(28 PREVTOP 50 AUTO) LEFTANCHOR
+	LIST "Get GPS Ident" "Download Track" "Download Waypts" "Download Route" "Upload DB" ID LST_ACTION AT (PREVLEFT PREVTOP AUTO AUTO) NONUSABLE VISIBLEITEMS 5
+	POPUPLIST ID TRIG_ACTION LST_ACTION
+	BUTTON "Execute" ID BTN_EXEC AT (2 145 AUTO AUTO)
 END
 
 FORM ID NameForm AT (1 90 158 69)
@@ -55,15 +62,51 @@ BEGIN
 	TITLE "Delete Database"
 	LABEL "Mark the DB to delete" AUTOID AT (7 20)
 	LIST ""  ID LST_DBLST AT (7 PREVBOTTOM+4 140 80)
-	BUTTON "Delete" ID BTN_DEL_DB AT (5 BOTTOM@145 AUTO AUTO)
+	BUTTON "Del" ID BTN_DEL_DB AT  (5 BOTTOM@145 AUTO AUTO)
 	BUTTON "Backup" ID BTN_BCK_DB AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+	BUTTON "Info" ID BTN_INFO_DB AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
 	BUTTON "End" AUTOID AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+END
+
+FORM ID UploadDbForm AT (1 5 158 154)
+	HELPID 3
+	MODAL
+BEGIN
+	TITLE "Upload Database"
+	LABEL "Mark DB for Upload" AUTOID AT (7 20)
+	LIST ""  ID LST_DBLST AT (7 PREVBOTTOM+4 140 80)
+	BUTTON "Upload" ID BTN_UP_DB AT (5 BOTTOM@145 AUTO AUTO)
+	BUTTON "Info" ID BTN_INFO_DB  AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+	BUTTON "End" AUTOID AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+END
+
+FORM ID InfoForm AT (1 5 158 154)
+	MODAL
+BEGIN
+	TITLE "Info"
+	LABEL "Name:" AUTOID AT (5 20)
+	LABEL "X                                    " INFO_NAME AT (48 PREVTOP)
+	LABEL "Type:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_TYPE AT (48 PREVTOP)
+	LABEL "Records:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_RECORDS AT (48 PREVTOP)
+	LABEL "Size:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_SIZE AT (48 PREVTOP)
+	LABEL "Created:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_CREATED AT (48 PREVTOP)
+	LABEL "Backuped:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_BACKUPED AT (48 PREVTOP)
+	LABEL "Version:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_VERSION AT (48 PREVTOP)
+	LABEL "Flags:" AUTOID AT (5 PREVBOTTOM+1)
+	LABEL "X                                    " INFO_FLAGS AT (48 PREVTOP)
+	BUTTON "OK" AUTOID AT (5 BOTTOM@145 AUTO AUTO)
 END
 
 ALERT ID AboutAlert
 BEGIN
 	TITLE "About..."
-	MESSAGE "MagellanConnect\nVersion 0.94\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
+	MESSAGE "MagellanConnect\nVersion 0.95\n\nCopyright \251 2003\nKlaus-Martin Hansche"
 	BUTTONS "OK"
 END
 
@@ -94,4 +137,6 @@ END
 ICON "icon.bmp"
 
 STRING ID 1 "HILFE"
-STRING ID 2 "Hit <Delete> to delete a DB\n\nHit <Backup> to set the backupflag for a DB\n(Note: That schuld only be neccesary, if you have got pre 0.9.2 databases that aren't backed up.)"
+STRING ID 2 "<Del> deletes the selected DB\n\n<Backup> sets the backup flag for a DB\n(Note: That should only be neccesary, if you have got pre 0.9.2 databases that aren't backed up.)\n<Info> displays some info about the selected DB"
+STRING ID 3 "<Upload> uploads the selected DB. \n\n <Info> display some info about the DB."
+

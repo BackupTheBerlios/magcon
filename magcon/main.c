@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.9 2003/02/24 18:10:25 niki Exp $ */
+/* $Id: main.c,v 1.10 2003/10/05 10:17:52 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -7,7 +7,7 @@
 #include "resource.h"
 #include "magellan.h"
 #include "ser.h"
-#include "deldb.h"
+#include "dbdia.h"
 
 typedef struct{
 	UInt32 baud;
@@ -23,6 +23,7 @@ apppref pref;
 UInt16 prefsize;
 
 /* Functions */
+
 UInt32 get_lst_int(const UInt16 lst_const,const UInt32 def){
 	ListType *lst;
 	char *s_baud;
@@ -61,11 +62,12 @@ void set_lst(const UInt16 lst_const,const UInt16 val){
 void set_lst_int(const UInt16 lst_const, const UInt32 val){
 	if(lst_const==LST_BAUD){
 		switch(val){
-			case 4800:  set_lst(lst_const,0); break;
-			case 9600:  set_lst(lst_const,1); break;
-			case 19200:  set_lst(lst_const,2); break;
-			case 57600:  set_lst(lst_const,3); break;
-			case 115200:  set_lst(lst_const,4); break;
+			case 1200:  set_lst(lst_const,0); break;
+			case 4800:  set_lst(lst_const,1); break;
+			case 9600:  set_lst(lst_const,2); break;
+			case 19200:  set_lst(lst_const,3); break;
+			case 57600:  set_lst(lst_const,4); break;
+			case 115200:  set_lst(lst_const,5); break;
 		}
 	}
 	else if(lst_const==LST_TIMEOUT){
@@ -90,7 +92,8 @@ void set_lst_int(const UInt16 lst_const, const UInt32 val){
 			case 20:  set_lst(lst_const,17); break;
 				 
 		}
-	}
+	} 
+
 }
 
 static Err StartApplication() 
@@ -117,43 +120,18 @@ static Err StartApplication()
 
 static void StopApplication() 
 {
-	pref.baud=get_lst_int(LST_BAUD,4600);
+	pref.baud=get_lst_int(LST_BAUD,4800);
 	pref.timeout=get_lst_int(LST_TIMEOUT,3);
 	PrefSetAppPreferences(AppId,1,1,&pref,sizeof(pref),false);
 	FrmCloseAllForms();
 }
 
-/* Export a string to memopad */
-static void data_to_memo(char* data){
-	ExgSocketPtr soc;
-	Err err=0;
-
-	soc=(ExgSocketPtr) MemPtrNew(sizeof(ExgSocketType));
-	if(soc){
-		MemSet(soc,sizeof(ExgSocketType),0);
-		soc->localMode=1;
-		soc->description="Magellan Datatransfer";
-		soc->name="magexp.txt";
-		if(osv>=0x03503000){
-			soc->noGoTo=1;
-		}
-
-		err=ExgPut(soc);
-		if(!err && data && StrLen(data)>0){
-			ExgSend(soc,data,StrLen(data),&err);
-			ExgDisconnect(soc,err);
-		} else {
-			FrmCustomAlert(ALM_DLG1,"Could not communicate with Memo-App"," "," ");
-		}
-		MemPtrFree(soc);
-	}
-}
-
 /* MainForm eventhandler */
 Boolean MainFormEventHandler(EventPtr event) 
 {
+    ListType *lst;
 	Boolean handled = false;
-	char* howto="On your GPS:\n1. Turn  NMEA off\n2. Set baud to the value selected below.";
+	char* howto="On your GPS:\n1. Turn  NMEA off\n2. Set baud to the value below";
 	FieldType *fld;
 
 	switch (event->eType) {
@@ -167,6 +145,7 @@ Boolean MainFormEventHandler(EventPtr event)
 	
 					   set_lst_int(LST_BAUD,pref.baud);
 					   set_lst_int(LST_TIMEOUT,pref.timeout);
+					   set_lst(LST_ACTION,0);
 					   break;
 				   }
 
@@ -178,29 +157,40 @@ Boolean MainFormEventHandler(EventPtr event)
 				   break;
 		case ctlSelectEvent:
 				   switch(event->data.ctlSelect.controlID){
-					   case BTN_ID:
-						   //Get MagID
+				       case BTN_EXEC:
+					   lst=FrmGetObjectPtr(gpForm, FrmGetObjectIndex(gpForm, LST_ACTION));
+					   switch(LstGetSelection(lst)) {
+					       case 0:
 						   get_mag_id();
 						   handled = true;
 						   break;
-					   case BTN_TRK:
+					       case 1: 
 						   mag_get_data(track);
-						   handled=true;
+						   handled = true;
 						   break;
-					   case BTN_WPT:
+					       case 2:
 						   mag_get_data(waypt);
-						   handled=true;
+						   handled = true;
 						   break;
-					   default:
+					       case 3:
+						   mag_get_data(route);
+						   handled = true;
 						   break;
+					       case 4:
+						   mag_upload();
+						   handled = true;
+						   break;
+					       default:
+						   break;
+					   }
+				       default:
+					   break;
 				   }
-
-		default:
-				   // -Wall warning eater: switch must handle all enum
-				   // elements.
-				   break;
+	    default:
+		// -Wall warning eater: switch must handle all enum
+		// elements.
+		break;
 	}
-
 	return handled;
 }
 
@@ -233,8 +223,14 @@ static Boolean ApplicationEventHandler(EventPtr event)
 					   case MainMenuGetWaypts:
 						   mag_get_data(waypt);
 						   break;
+					   case MainMenuGetRoute:
+						   mag_get_data(route);
+						   break;
+					   case MainMenuUpload:
+						   mag_upload();
+						   break;
 					   case MainMenuDelDb:
-						   deldb_diag();
+						   db_diag(DelDbForm);
 						   break;
 				   }
 

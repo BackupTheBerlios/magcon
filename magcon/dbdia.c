@@ -1,4 +1,4 @@
-/* $Id: dbdia.c,v 1.1 2003/10/05 10:14:54 niki Exp $ */
+/* $Id: dbdia.c,v 1.2 2003/10/05 10:17:52 niki Exp $ */
 #include <PalmOS.h>
 #include <DataMgr.h>
 #include <List.h>

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2003/02/24 18:10:25 niki Exp $
+# $Id: Makefile,v 1.5 2003/10/05 10:17:52 niki Exp $
 # Macros
 
 PROGRAM=mag1
@@ -11,8 +11,8 @@ APID=Mag1
 CFLAGS=-Wall -g
 LFLAGS=-g
 
-SOURCES=main.c magellan.c ser.c deldb.c
-OBJS=main.o magellan.o ser.o deldb.o
+SOURCES=main.c magellan.c ser.c dbdia.c
+OBJS=main.o magellan.o ser.o dbdia.o
 PRC=$(PROGRAM).prc
 RESOURCES=$(PROGRAM).rcp
 
@@ -46,7 +46,7 @@ install: all
 	 pilot-xfer -i mag1.prc
 
 # Dependency targets
-main.o: main.c resource.h magellan.h ser.h deldb.h
-magellan.o: magellan.c resource.h ser.h
+main.o: main.c resource.h magellan.h ser.h dbdia.h
+magellan.o: magellan.c resource.h ser.h dbdia.h
 ser.o: ser.c magellan.h resource.h
-deldb.o: deldb.c resource.h
+dbdia.o: dbdia.c resource.h magellan.h 

@@ -1,4 +1,4 @@
-/* $Id: ser.c,v 1.7 2003/02/24 18:10:25 niki Exp $ */
+/* $Id: ser.c,v 1.8 2003/10/05 10:17:52 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
 #include <StringMgr.h>
@@ -7,6 +7,7 @@
 #include "mag1.h"
 
 UInt16 serlib;
+Boolean GPSunable=false;
 
 Boolean send_string(char* str,Boolean ack);
 
@@ -44,7 +45,7 @@ void error_dlg(Err err){
 
 	if(err==serErrLineErr) SerClearErr(serlib);
 	SysErrString(err,errpuff,512);
-	FrmCustomAlert(ALM_DLG1,"SHIT!",errpuff,"while reading");
+	FrmCustomAlert(ALM_DLG1,"System error:",errpuff,"while reading");
 }
 
 Boolean get_string(char* string,UInt16 size){
@@ -55,35 +56,67 @@ Boolean get_string(char* string,UInt16 size){
 	UInt16 minsize;
 	UInt16 timeout;
 	UInt16 maxret=5;
+	UInt16 nl, i;
+	UInt16 filled=0;
 	
 	ret=false;
 	bytetran=0;
+	
 
 	minsize=16;
 	timeout=SysTicksPerSecond()/get_lst_int(LST_TIMEOUT,3);
 
 	if (size<=0){return ret;}
 
-	puffer=(char*) MemPtrNew(size);
+	puffer=(char*) MemPtrNew(size+1024);
+	MemSet(puffer,size+1024,0);
 	if(puffer){
-		MemSet(puffer,size,0);
-		while ((err=SerReceiveWait(serlib,minsize,SysTicksPerSecond()))==serErrTimeOut && maxret-->=1);
-		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-		bytetran=SerReceive(serlib,puffer,size-1,timeout,&err);
-		/*FrmCustomAlert(ALM_DLG1,puffer," "," ");*/
-		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-		if(bytetran>0 && puffer[bytetran-1]=='\n'){
-			StrNCopy(string,puffer,size); /*puffer includes trailing \0*/
-			ret=true;
-		}else{
-			if(bytetran>0) FrmCustomAlert(ALM_DLG1,"Receivebuffer may be too small!","Or TimeoutDiv to large","Discarding data...");
-			SerReceiveFlush(serlib,timeout);
+	    while (1) {
+		if (filled > size+512) {
+		    FrmCustomAlert(ALM_DLG1,"Too many input records!"," ","Discarding data...");
+		     SerReceiveFlush(serlib,timeout);
+		     goto end;
 		}
-end:	
-		MemPtrFree(puffer);
+		while ((err=SerReceiveWait(serlib,minsize,SysTicksPerSecond()))==serErrTimeOut && maxret-->=1);
+		if(err && err!=serErrTimeOut){ 
+		    error_dlg(err); 
+		    break;
+		}
+		bytetran=SerReceive(serlib,puffer+filled,size-1,timeout,&err);
+		if(err && err!=serErrTimeOut){ 
+		    error_dlg(err); 
+		    break;
+		}
+		if (bytetran == 0) {
+		    /* we have not received anything! */
+		     FrmCustomAlert(ALM_DLG1,"Receive timeout!\nIs the GPS connected with the right baud rate?","","");
+		     break;
+		}
+		filled=filled+bytetran;
+		/* FrmCustomAlert(ALM_DLG1,"RECEIVED:\n",puffer,""); */
+		if(puffer[filled-1] == '\n'){
+		    /* Complete line received! Ignore all earlier
+		       lines we got.  This accounts for the problem
+		       when the GPS is in handshake mode initially and
+		       when it has already resent a record after not
+		       receiving an ack in time */
+		    nl = 0;
+		    for (i=filled-1;i>0;i--) {
+			if (puffer[i-1] == '\n') {
+			    nl=i;
+			    break;
+			}
+		    }
+		    StrNCopy(string,puffer+nl,size); /*puffer includes trailing \0*/
+		    ret=true;
+		    break;
+		}
+	    }
 	} else {
-		FrmCustomAlert(ALM_DLG1,"ALLOC FAILURE"," "," ");
+	    FrmCustomAlert(ALM_DLG1,"ALLOC FAILURE"," "," ");
 	}
+end:	
+	if (puffer) { MemPtrFree(puffer); }
 	return ret;
 }
 
@@ -105,7 +138,7 @@ Boolean send_string(char* str,Boolean ack){
 	if (sndstr){
 		magchksum(str,puffer1,3);
 		err1=StrPrintF(sndstr,"%s%s\r\n",str,puffer1);
-		/*FrmCustomAlert(ALM_DLG1,sndstr," "," ");*/
+		/* FrmCustomAlert(ALM_DLG1,"SENT:\n",sndstr," ");*/
 		if(err1<0){
 			FrmCustomAlert(ALM_DLG1,"Stringerror"," "," ");
 		} else {
@@ -126,7 +159,14 @@ Boolean send_string(char* str,Boolean ack){
 	}
 	if (ret && ack){
 		get_string(puffer2,17);
-		ret=(puffer2[9]==puffer1[0] && puffer2[10]==puffer1[1]);
+		/* FrmCustomAlert(ALM_DLG1,"GOT ACK:\n",puffer2," "); */
+		if (StrNCompare(puffer2,"$PMGNCMD,UNABLE*",16) == 0) {
+		    FrmCustomAlert(ALM_DLG1,"GPS is unable to complete its operation for the record: ",str,puffer1);
+		    GPSunable = true;
+		    return false;
+		}
+		ret=(puffer2[9]==puffer1[0] && puffer2[10]==puffer1[1] && 
+		    StrNCompare(puffer2,"$PMGNCSM",8) == 0);
 	}
 	return ret;
 }

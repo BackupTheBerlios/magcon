@@ -1,27 +1,26 @@
-/* $Id: magellan.c,v 1.9 2003/02/28 14:47:51 niki Exp $ */
+/* $Id: magellan.c,v 1.10 2003/10/05 10:17:52 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
 #include <SerialMgrOld.h>
+#include "magellan.h"
 #include "resource.h"
 #include "ser.h"
+#include "dbdia.h"
 
-typedef enum _msgtype {track=1,waypt} msgtype;
+static char *elemtype;
+static char *operation;
 
 static void strtohex(UInt32 data,char* puffer,UInt32 size){
 	char puffer1[512];
 	int i,j;
-	Boolean ever;
 	
-	j=0;
-	ever=false;
-	
+	j=size-1;
+	// Assumption: The generated hex number is always as long 
+	// as size-1 or longer
 	StrIToH(puffer1,data);
-	for(i=0;i<StrLen(puffer1)&&j<size;i++){
-		if(puffer1[i]!='0' || ever){
-			puffer[j++]=puffer1[i];
-			ever=true;
-		}
+	for(i=StrLen(puffer1),j=size;j>0;j--,i--){
+	    puffer[j-1]=puffer1[i];
 	}
 }
 
@@ -87,30 +86,77 @@ static char* input_name(void){
 
 	return name;
 }
+
+/* Connect to GPS (and get ID string!) */
+
+Boolean gps_connect(char *idstring, UInt16 size) {
+    char *msr="$PMGNCMD,VERSION*";
+    char *mrep="$PMGNVER"; 
+    char *mcsm="$PMGNCSM";
+    char *handon="$PMGNCMD,HANDON*";
+    Boolean handshake=false;
+    char msg[512];
+    char field[512];
+
+    idstring[0] = '\0';
+    if(!ser_open()){
+	return false;
+    }
+    send_string(msr,false);
+    msg[0]='\0';
+    if(get_string(msg,512)) {
+	if (StrNCompare(msg,mcsm,StrLen(mcsm))==0) {
+	    handshake = true;
+	    // this is an ack record to our version record: ignore
+	    if (!get_string(msg,512)) {
+		ser_close();
+		return false;
+	    }
+	}
+	if (StrNCompare(msg,mrep,StrLen(mrep))!=0) {
+	    FrmCustomAlert(ALM_DLG1,
+			   "Expected version record from GPS but got:\n",
+			   msg,"");
+	    ser_close();
+	    return false;
+	} else {
+	    get_field(msg,field,512,4);
+	    StrCat(field,"  ");
+	    get_field(msg,field+StrLen(field),512-StrLen(field),3);
+	    StrNCopy(idstring,field,size);
+	}
+    } else {
+	ser_close();
+	return false;
+    }
+    if (!handshake) { // if handshake is not enabled yet, do it
+	send_string(handon,false);
+    }
+    return true;
+}
+
+void gps_disconnect() {
+    char *handoff="$PMGNCMD,HANDOFF*";
+
+    send_string(handoff,false);
+    SerReceiveFlush(serlib,SysTicksPerSecond()/2);
+    ser_close();
+}
+
+
 /* Get the ID of the magellanunit */
 void get_mag_id(void){
-	char *msr="$PMGNCMD,VERSION*";
-	char msg[512];
-	char field[512];
-
-	if(ser_open()){
-		send_string(msr,false);
-		if(get_string(msg,512)){
-			get_field(msg,field,512,4);
-			StrCat(field,"  ");
-			get_field(msg,field+StrLen(field),512-StrLen(field),3);
-			FrmCustomAlert(INF_DLG1,"Found Magellan:",field," ");
-			/*WinDrawChars(field,StrLen(field),2,105);*/
-		} else {
-			FrmCustomAlert(ALM_DLG1,"Could not get Magellan ID"," "," ");
-		}
-		ser_close();
-	}
+    char idstring[512];
+    
+    if (gps_connect(idstring,512)) {
+	FrmCustomAlert(INF_DLG1,"Found Magellan:",idstring," ");
+	gps_disconnect();
+    }
 }
 
 /* Callback for progressdialog */
 static Boolean progress_cb (PrgCallbackDataPtr cbp){
-	StrPrintF(cbp->textP,"Got %i Waypoints",cbp->stage);
+	StrPrintF(cbp->textP,"%s %i %s",operation,cbp->stage,elemtype);
 	return true;
 }
 
@@ -133,10 +179,13 @@ static void addrecord(DmOpenRef dbref, char* msg){
 }
 
 static Boolean get_data(msgtype type, DmOpenRef dbref){
-	char *handon="$PMGNCMD,HANDON*";
-	char *handoff="$PMGNCMD,HANDOFF*";
 	char *msgtrack="$PMGNCMD,TRACK,2*";
 	char *msgwaypt="$PMGNCMD,WAYPOINT*";
+	char *msgroute="$PMGNCMD,ROUTE*";
+	char *progtrack="trackpoints";
+	char *progwaypts="waypoints";
+	char *progroute="route records";
+	char *progop="Got";
 	char *msr;
 	char msg[1024];
 	char field[512];
@@ -155,16 +204,22 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 	msgcount=0;
 	cancelled=false;
 
+	operation = progop;
 	switch(type){
-		case track: msr=msgtrack; break;
-		case waypt: msr=msgwaypt; break;
+		case track: msr=msgtrack; elemtype=progtrack; break;
+		case waypt: msr=msgwaypt; elemtype=progwaypts; break;
+		case route: msr=msgroute; elemtype=progroute; break;
 		default: return false;
 	}
 
-	if(!ser_open()){return false;}
+	if(!gps_connect(field,512)){return false;}
 
-	if(!send_string(handon,false)){ser_close(); return false;} 
-	if(!send_string(msr,true)){ send_string(handoff,true); ser_close(); return false;}
+	if(!send_string(msr,true)){ 
+	    /* if the unit does not reply, we assume that we were not
+	       successful in switching to handshake mode -- and do not
+	       try to disable the mode again */
+	    ser_close(); return false;
+	}
 	
 	/* The real McCoy - Get everything the Magellan wants to give */
 	timeout=SysSetAutoOffTime(0);
@@ -175,45 +230,58 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 			chk[2]=0; chk2[2]=0;
 			get_checksum(msg,chk,3);
 			magchksum(msg,chk2,3);
-			StrPrintF(field,"$PMGNCSM,%s*",chk);
-			send_string(field,false);
-			if(StrCompare(chk,chk2)!=0) break;
-			/*FrmCustomAlert(ALM_DLG1,msg,field," ");*/
-			EvtGetEvent(&evt,10);
-			while(evt.eType!=nilEvent){
+			if(StrCompare(chk,chk2)!=0) {
+			    /* csum error forces a resend by not sending
+			       an ack! */
+			    FrmCustomAlert(ALM_DLG1,"Checksum error! We try to recover."," "," ");
+			} else {
+			    StrPrintF(field,"$PMGNCSM,%s*",chk2);
+			    send_string(field,false);
+			    /* FrmCustomAlert(ALM_DLG1,msg,field," "); */
+			    EvtGetEvent(&evt,10);
+			    while(evt.eType!=nilEvent){
 				if(!PrgHandleEvent(progptr,&evt)){
-					FrmCustomAlert(ALM_DLG1,"Sorry!","You can't cancel.","It upsets the Magellan");
+				    /* Actually, it is not too bad
+				       to cancel a transfer. Just switch the
+				       GPS off & on again if necessary*/ 
+				    FrmCustomAlert(ALM_DLG1,"Transfer cancelled!","Switch GPS off & on","to reset communcation.");
+				    goto end;
 				}
 				EvtGetEvent(&evt,1);
-			}
-			PrgUpdateDialog(progptr,0,msgcount++,NULL,true);
-			if(StrNCompare(msg,"$PMGNCMD,END*",13)==0){
+			    }
+			    PrgUpdateDialog(progptr,0,msgcount++,NULL,true);
+			    if(StrNCompare(msg,"$PMGNCMD,END*",13)==0){
 				done=true;
 				complete=true;
-			} else {
+			    } else if (StrNCompare(msg,"$PMGNCMD,UNABLE*",16)==0){
+				done=true;
+				FrmCustomAlert(ALM_DLG1,"GPS was unable to complete operation!","","");
+			    } else {
 				addrecord(dbref,msg);
+			    }
 			}
 		} else {
 			done=true;
 		}
 	}
-	send_string(handoff,true);
-	SerReceiveFlush(serlib,SysTicksPerSecond()/2);
+ end:
+	gps_disconnect();
 	SysSetAutoOffTime(timeout);
-	
 	if(progptr){PrgStopDialog(progptr,false);}
-	ser_close();
 	
 	return complete;
 }
 
-/* Get the waypoints from PS*/
+/* Get the waypoints from GPS */
 void mag_get_data(msgtype msgt){
 	char*t="";
 	LocalID dbid;
 	DmOpenRef dbref;
 	UInt16 vers=DbVers;
 	UInt16 newdbattr=dmHdrAttrBackup;
+	Boolean success;
+
+	GPSunable=false;
 
 	t=input_name();
 	if(StrLen(t)==0){return;}
@@ -236,15 +304,117 @@ void mag_get_data(msgtype msgt){
 		FrmCustomAlert(ALM_DLG1,"Could not open Database!"," "," ");
 		return;
 	}
-
-	if(get_data(msgt,dbref)){
-		DmCloseDatabase(dbref);
-		FrmCustomAlert(INF_DLG1,"Saved database:",t," ");
-	} else{
+	if (msgt == route) {
+	    success = get_data(waypt,dbref);
+	    if (!success) {
 		DmCloseDatabase(dbref);
 		DmDeleteDatabase(0,dbid);
-		FrmCustomAlert(ALM_DLG1,"Could not get waypoints!"," "," ");
+		FrmCustomAlert(ALM_DLG1,"Error while downloading from GPS!"," "," ");
+	    return;
+	    }
+	}
+	if(get_data(msgt,dbref)){
+	    DmCloseDatabase(dbref);
+	    FrmCustomAlert(INF_DLG1,"Saved database:",t," ");
+	} else{
+	    DmCloseDatabase(dbref);
+	    DmDeleteDatabase(0,dbid);
+	    FrmCustomAlert(ALM_DLG1,"Error while downloading from GPS!"," "," ");
 	}
 }
+
+/* Upload something to the GPS receiver */
+void mag_upload() {
+    LocalID dbid;
+    DmOpenRef dbref;
+    UInt16 ix,maxix;
+    MemHandle mh;
+    MemPtr    mp;
+    UInt16    retry;
+    UInt16 timeout;
+    ProgressPtr progptr;
+    UInt16 msgcount=0;
+    char *msr="Uploading Data";
+    char *progop="Sent";
+    char *progrec="records";
+    char field[512];
+    EventType evt;
+
+    GPSunable=false;
+	
+    operation=progop;
+    elemtype=progrec;
+
+    UploadDbName[0] = '\0';
+    db_diag(UploadDbForm);
+    if (UploadDbName[0] == '\0') {
+	return;
+    UploadDbName[31] = '\0';
+    }
+
+    dbid=DmFindDatabase(0,UploadDbName);
+    if(dbid==0) {
+	FrmCustomAlert(ALM_DLG1,"Could not find Database'",UploadDbName,"'");
+	return;
+    }
+	
+    if (!gps_connect(field,512)) {
+	return;
+    }
+
+    dbref=DmOpenDatabase(0,dbid,dmModeReadOnly);
+    if (dbref==NULL) {
+	FrmCustomAlert(ALM_DLG1,"Could not open Database'",UploadDbName,"'");
+	gps_disconnect();
+	return;
+    }
+
+    timeout=SysSetAutoOffTime(0);
+    progptr=PrgStartDialogV31(msr,progress_cb);
+    
+    maxix = DmNumRecords(dbref);
+    for (ix=0;ix<maxix;ix++) {
+	mh = DmQueryRecord(dbref,ix);
+	if (mh==0) {
+	    FrmCustomAlert(ALM_DLG1,"Internal error!",
+			   "No handle for index","");
+	    goto end;
+	}
+	mp = MemHandleLock(mh);
+	StrCopy(field,mp);
+	if (field[StrLen(field)-1] != '\n' || field[StrLen(field)-2] != '\r') {
+	    FrmCustomAlert(ALM_DLG1,"Record does not end in CR/LF",
+			   "Aborting ...", " ");
+	    goto end;
+	}
+	retry = 5;
+	while (!send_string(field,true) && retry > 1 && !GPSunable) { retry--; }; 
+	MemHandleUnlock(mh);
+	if (GPSunable) { goto end; }
+	if (retry == 0) {
+	    FrmCustomAlert(ALM_DLG1,"GPS does not respond anymore",
+			   " "," ");
+	    goto end;
+	} else {
+	    EvtGetEvent(&evt,10);
+	    while(evt.eType!=nilEvent){
+		if(!PrgHandleEvent(progptr,&evt)){
+		    /* Actually, it is not too bad
+		       to cancel a transfer. Just switch the
+		       GPS off & on again if necessary*/ 
+		    FrmCustomAlert(ALM_DLG1,"Upload incomplete!","","");
+		    goto end;
+		}
+		EvtGetEvent(&evt,1);
+	    }
+	    PrgUpdateDialog(progptr,0,++msgcount,NULL,true);
+	}
+    }
+ end:
+    SysSetAutoOffTime(timeout);
+    DmCloseDatabase(dbref);
+    if(progptr){PrgStopDialog(progptr,false);}
+    gps_disconnect();
+    }
 
 /* vim: set fdm=indent: */
