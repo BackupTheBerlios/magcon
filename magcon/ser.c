@@ -1,4 +1,4 @@
-/* $Id: ser.c,v 1.4 2003/02/11 16:10:26 niki Exp $ */
+/* $Id: ser.c,v 1.5 2003/02/17 14:52:56 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
 #include <StringMgr.h>
@@ -129,7 +129,8 @@ Boolean send_string(char* str,Boolean ack){
 		MemPtrFree(sndstr);
 	}
 	if (ret && ack){
-		ret=get_string(puffer2,17);
+		get_string(puffer2,17);
+		ret=(puffer2[9]==puffer1[0] && puffer2[10]==puffer1[1]);
 	}
 	return ret;
 }

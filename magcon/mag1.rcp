@@ -5,17 +5,17 @@ MENU ID MainMenu
 BEGIN
 	PULLDOWN "Action"
 	BEGIN
-		MENUITEM "Get Id" ID MainMenuGetId
-		MENUITEM "Get Track" ID MainMenuGetTrack
-		MENUITEM "Get Waypoints" ID MainMenuGetWaypts
+		MENUITEM "Get Id" ID MainMenuGetId "i"
+		MENUITEM "Get Track" ID MainMenuGetTrack "t"
+		MENUITEM "Get Waypoints" ID MainMenuGetWaypts "w"
 	END
 	PULLDOWN "DB"
 	BEGIN
-		MENUITEM "Delete a DB" ID MainMenuDelDb
+		MENUITEM "Delete a DB" ID MainMenuDelDb "d"
 	END
 	PULLDOWN "Help"
 	BEGIN
-		MENUITEM "About..." ID HelpMenuAbout
+		MENUITEM "About..." ID HelpMenuAbout "a"
 	END
 END
 

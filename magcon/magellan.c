@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.5 2003/02/15 18:07:57 niki Exp $ */
+/* $Id: magellan.c,v 1.6 2003/02/17 14:52:56 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -33,7 +33,7 @@ void magchksum (char *data, char* chksum,UInt32 size){
 	len = StrLen (data) - 1;  //Don't include the '*' at end of message!
 
 	//idx starts at 1 becuase the '$' isn't part of the checksum!
-	for (idx = 1; idx < len; idx++) {
+	for (idx = 1; idx < len && data[idx]!='*'; idx++) {
 		CheckVal = CheckVal ^ data[idx];
 	}
 	strtohex(CheckVal,chksum, size);
@@ -140,6 +140,7 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 	char msg[1024];
 	char field[512];
 	char chk[3];
+	char chk2[3];
 	UInt16 timeout;
 	
 	Boolean done,complete;
@@ -170,9 +171,12 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 	while(!done && progptr){
 		MemSet(msg,1024,0);
 		if(get_string(msg,1024)){
+			chk[2]=0; chk2[2]=0;
 			get_checksum(msg,chk,3);
+			magchksum(msg,chk2,3);
 			StrPrintF(field,"$PMGNCSM,%s*",chk);
 			send_string(field,false);
+			if(StrCompare(chk,chk2)!=0) break;
 			/*FrmCustomAlert(ALM_DLG1,msg,field," ");*/
 			EvtGetEvent(&evt,10);
 			while(evt.eType!=nilEvent){
