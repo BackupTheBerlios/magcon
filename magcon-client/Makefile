@@ -27,6 +27,6 @@ clean :
 dist : clean
 	rm -rf 2mag-src
 	ln -s . 2mag-src
-	tar -czf ../2mag-src.tar.gz 2mag-src/*.c 2mag-src/*.h 2mag-src/Makefile 2mag-src/LICENSE 2mag-src/README 2mag-src/coldsync/*
+	tar -czf ../2mag-src.tar.gz 2mag-src/*.c 2mag-src/*.h 2mag-src/Makefile 2mag-src/LICENSE 2mag-src/README 2mag-src/coldsync/* 2mag-src/contrib/*.c
 	rm -f 2mag-src
 
