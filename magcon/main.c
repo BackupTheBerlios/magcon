@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.4 2003/02/08 11:13:03 niki Exp $ */
+/* $Id: main.c,v 1.5 2003/02/08 18:43:24 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -7,6 +7,7 @@
 #include "resource.h"
 #include "magellan.h"
 #include "ser.h"
+#include "deldb.h"
 
 /* Pointer to the currently-active form */
 static FormPtr gpForm;
@@ -141,6 +142,9 @@ static Boolean ApplicationEventHandler(EventPtr event)
 						   break;
 					   case MainMenuGetWaypts:
 						   mag_get_data(waypt);
+						   break;
+					   case MainMenuDelDb:
+						   deldb_diag();
 						   break;
 				   }
 

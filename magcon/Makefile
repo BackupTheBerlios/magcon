@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2003/02/02 10:41:16 niki Exp $
+# $Id: Makefile,v 1.2 2003/02/08 18:43:24 niki Exp $
 # Macros
 
 PROGRAM=mag1
@@ -11,8 +11,8 @@ APID=Mag1
 CFLAGS=-Wall -g
 LFLAGS=-g
 
-SOURCES=main.c magellan.c ser.c
-OBJS=main.o magellan.o ser.o
+SOURCES=main.c magellan.c ser.c deldb.c
+OBJS=main.o magellan.o ser.o deldb.o
 PRC=$(PROGRAM).prc
 RESOURCES=$(PROGRAM).rcp
 
@@ -43,8 +43,7 @@ dist: clean
 	zip -9 ../magcon *.[ch] *.rcp *.bmp Makefile README LICENSE
 
 # Dependency targets
-
-main.o: main.c resource.h ser.h magellan.h
-magellan.o: magellan.c
-ser.o: ser.c resource.h
-
+main.o: main.c resource.h magellan.h ser.h deldb.h
+magellan.o: magellan.c resource.h ser.h
+ser.o: ser.c magellan.h resource.h
+deldb.o: deldb.c resource.h
