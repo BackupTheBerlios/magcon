@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.6 2003/02/09 14:54:13 niki Exp $ */
+/* $Id: main.c,v 1.7 2003/02/11 16:10:26 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -26,7 +26,7 @@ static Err StartApplication()
 		FrmCustomAlert(ALM_DLG1,"Could not find serial Library"," "," ");
 		return 1;
 	}
-
+	
 	FrmGotoForm(MainForm);
 	return 0;
 }

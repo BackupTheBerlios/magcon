@@ -1,4 +1,4 @@
-/* $Id: ser.c,v 1.3 2003/02/10 17:25:35 niki Exp $ */
+/* $Id: ser.c,v 1.4 2003/02/11 16:10:26 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
 #include <StringMgr.h>
@@ -8,10 +8,12 @@
 UInt16 serlib;
 UInt16 timeoutdiv=3;
 
+Boolean send_string(char* str,Boolean ack);
+
 Boolean ser_open(void){
 	SerSettingsType portSettings;
 	Err err;
-
+	
 	err=SerOpen(serlib,0,4800);
 	if(err){
 		FrmCustomAlert(ALM_DLG1,"Could not open serial port!"," "," ");
@@ -22,9 +24,8 @@ Boolean ser_open(void){
 	portSettings.baudRate=4800;
 	portSettings.flags=(serSettingsFlagStopBits1 |	serSettingsFlagBitsPerChar8 );//| serSettingsFlagRTSAutoM);
 	SerSetSettings(serlib,&portSettings);
-
+	
 	SerSendFlush(serlib);
-
 	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
 	SerSendFlush(serlib);
 	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);

@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.3 2003/02/10 17:25:35 niki Exp $ */
+/* $Id: magellan.c,v 1.4 2003/02/11 16:10:26 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -192,9 +192,9 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 			done=true;
 		}
 	}
-	SysSetAutoOffTime(timeout);
 	send_string(handoff,true);
 	SerReceiveFlush(serlib,SysTicksPerSecond()/2);
+	SysSetAutoOffTime(timeout);
 	
 	if(progptr){PrgStopDialog(progptr,false);}
 	ser_close();
