@@ -27,7 +27,7 @@ END
 ALERT ID AboutAlert
 BEGIN
 	TITLE "About..."
-	MESSAGE "MagellanConnect\nVersion 1.00\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
+	MESSAGE "MagellanConnect\nVersion 0.80\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
 	BUTTONS "OK"
 END
 
