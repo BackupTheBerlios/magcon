@@ -1,4 +1,4 @@
-GCC=gcc -Wall -g  -Icoldsync
+GCC=gcc -Wall -g  -Icoldsync -static
 COLDSYNC=coldsync/util.o coldsync/pdb.o
 OBJS=2mag.o $(COLDSYNC)
 

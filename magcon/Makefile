@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2003/02/08 18:43:24 niki Exp $
+# $Id: Makefile,v 1.3 2003/02/09 14:54:13 niki Exp $
 # Macros
 
 PROGRAM=mag1
@@ -39,8 +39,8 @@ clean:
 	rm -f *.bin *.grc *.o bin.res tags $(PRC) $(PROGRAM)
 
 dist: clean
-	rm -f ../magcon.zip
-	zip -9 ../magcon *.[ch] *.rcp *.bmp Makefile README LICENSE
+	rm -f ../magcon-src.zip
+	zip -9 ../magcon-src *.[ch] *.rcp *.bmp Makefile README LICENSE
 
 # Dependency targets
 main.o: main.c resource.h magellan.h ser.h deldb.h

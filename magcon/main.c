@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.5 2003/02/08 18:43:24 niki Exp $ */
+/* $Id: main.c,v 1.6 2003/02/09 14:54:13 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -66,7 +66,7 @@ static void data_to_memo(char* data){
 Boolean MainFormEventHandler(EventPtr event) 
 {
 	Boolean handled = false;
-	char* howto="On your GPS:\n1. Turn  NMEA off\n2. Set baud to 4800\n\nHit \"Get Track\"\n\nIn Memopad substitute <Name> with a meaningfull name";
+	char* howto="On your GPS:\n1. Turn  NMEA off\n2. Set baud to 4800\n\nHit \"Get Track\" and enter a name for your track.";
 	FieldType *fld;
 
 	switch (event->eType) {
