@@ -1,7 +1,6 @@
 #ifndef __SER_H_
 #define __SER_H_
 
-extern UInt16 serlib;
 extern Boolean GPSunable;
 extern Boolean ser_open(void);
 extern void ser_close(void);

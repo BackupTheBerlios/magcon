@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.10 2003/10/05 10:17:52 niki Exp $ */
+/* $Id: magellan.c,v 1.11 2004/05/23 17:09:05 loxley Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -139,7 +139,6 @@ void gps_disconnect() {
     char *handoff="$PMGNCMD,HANDOFF*";
 
     send_string(handoff,false);
-    SerReceiveFlush(serlib,SysTicksPerSecond()/2);
     ser_close();
 }
 

@@ -1,6 +1,6 @@
-/* $Id: ser.c,v 1.8 2003/10/05 10:17:52 niki Exp $ */
+/* $Id: ser.c,v 1.9 2004/05/23 17:09:05 loxley Exp $ */
 #include <PalmOS.h>
-#include <SerialMgrOld.h>
+#include <SerialMgr.h>
 #include <StringMgr.h>
 #include "magellan.h"
 #include "resource.h"
@@ -12,38 +12,37 @@ Boolean GPSunable=false;
 Boolean send_string(char* str,Boolean ack);
 
 Boolean ser_open(void){
-	SerSettingsType portSettings;
+	/*SerSettingsType portSettings;*/
 	UInt16 timeoutdiv;
 	Err err;
 	
 	timeoutdiv=get_lst_int(LST_TIMEOUT,3);
-	err=SerOpen(serlib,0,get_lst_int(LST_BAUD,4600));
+	err=SrmOpen(serPortCradlePort, get_lst_int(LST_BAUD,4600),&serlib);
 	if(err){
 		FrmCustomAlert(ALM_DLG1,"Could not open serial port!"," "," ");
-		if(err==serErrAlreadyOpen){SerClose(serlib);}
 		return false;
 	}
-	SerGetSettings(serlib,&portSettings);
+	/*SerGetSettings(serlib,&portSettings);
 	portSettings.baudRate=get_lst_int(LST_BAUD,4600);
 	portSettings.flags=(serSettingsFlagStopBits1 |	serSettingsFlagBitsPerChar8 );//| serSettingsFlagRTSAutoM);
 	SerSetSettings(serlib,&portSettings);
-	
-	SerSendFlush(serlib);
-	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
-	SerSendFlush(serlib);
-	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
+	*/
+	SrmSendFlush(serlib);
+	SrmReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
+	SrmSendFlush(serlib);
+	SrmReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
 
 	return true;
 }
 
 void ser_close(void){
-	SerClose(serlib);
+	SrmClose(serlib);
 }
 
 void error_dlg(Err err){
 	char errpuff[512];
 
-	if(err==serErrLineErr) SerClearErr(serlib);
+	if(err==serErrLineErr) SrmClearErr(serlib);
 	SysErrString(err,errpuff,512);
 	FrmCustomAlert(ALM_DLG1,"System error:",errpuff,"while reading");
 }
@@ -74,15 +73,15 @@ Boolean get_string(char* string,UInt16 size){
 	    while (1) {
 		if (filled > size+512) {
 		    FrmCustomAlert(ALM_DLG1,"Too many input records!"," ","Discarding data...");
-		     SerReceiveFlush(serlib,timeout);
+		     SrmReceiveFlush(serlib,timeout);
 		     goto end;
 		}
-		while ((err=SerReceiveWait(serlib,minsize,SysTicksPerSecond()))==serErrTimeOut && maxret-->=1);
+		while ((err=SrmReceiveWait(serlib,minsize,SysTicksPerSecond()))==serErrTimeOut && maxret-->=1);
 		if(err && err!=serErrTimeOut){ 
 		    error_dlg(err); 
 		    break;
 		}
-		bytetran=SerReceive(serlib,puffer+filled,size-1,timeout,&err);
+		bytetran=SrmReceive(serlib,puffer+filled,size-1,timeout,&err);
 		if(err && err!=serErrTimeOut){ 
 		    error_dlg(err); 
 		    break;
@@ -142,10 +141,10 @@ Boolean send_string(char* str,Boolean ack){
 		if(err1<0){
 			FrmCustomAlert(ALM_DLG1,"Stringerror"," "," ");
 		} else {
-			SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
-			count=SerSend(serlib,sndstr,StrLen(sndstr),&err);
+			SrmReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
+			count=SrmSend(serlib,sndstr,StrLen(sndstr),&err);
 			if(!err){
-				err=SerSendWait(serlib,-1);
+				err=SrmSendWait(serlib);
 				if(err){
 					FrmCustomAlert(ALM_DLG1,"Could not send"," "," ");
 				} else {

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.11 2003/10/05 10:19:06 niki Exp $ */
+/* $Id: main.c,v 1.12 2004/05/23 17:09:05 loxley Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -105,11 +105,12 @@ static Err StartApplication()
 		pref.action=0;
 	}
 	
-	err=SysLibFind("Serial Library",&serlib);
+	/*err=SysLibFind("Serial Library",&serlib);
 	if(err){
 		FrmCustomAlert(ALM_DLG1,"Could not find serial Library"," "," ");
 		return 1;
 	}
+	*/
 	
 	FrmGotoForm(MainForm);
 	return 0;
