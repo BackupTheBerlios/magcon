@@ -1,7 +1,6 @@
-/* $Id: 2mag.c,v 1.2 2003/02/03 16:23:53 niki Exp $ */
+/* $Id: 2mag.c,v 1.3 2003/02/08 13:32:37 niki Exp $ */
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
@@ -9,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mag.h"
+#include "coldsync/palm.h"
+#include "coldsync/pdb.h"
 
 #define PUFFSIZE 256
 
@@ -79,15 +80,14 @@ static int parsemagdatastring(const char *data, struct trkrec *trk){ /*{{{1*/
         return ret;
 }
 
-void parsemagconfile(const void *data, const int size, const int fd, const char* fname){ /*{{{1*/
+void parsemagconfile(struct pdb *pdb, const int fd, const char* fname){ /*{{{1*/
 	struct trkrec trk;
 	struct maghead hdr = {13, "4D533336 MS", "36",2};
-	char *ptr;
-	int i,j,reccount;
+	int j,reccount;
 	char buff[PUFFSIZE];
 	unsigned char len;
+        struct pdb_record *pdb_rec;
 	
-	ptr=(char*) data;
 	memset(buff,0,PUFFSIZE);
 	j=0;
 	reccount=0;
@@ -99,54 +99,58 @@ void parsemagconfile(const void *data, const int size, const int fd, const char*
 	write(fd,buff,len);
 	write(fd,&j,sizeof(int));
 	
-
-	for(i=0;i<size;i++){
-		if(j<PUFFSIZE) buff[j++]=(char)ptr[i];
-		if(ptr[i]=='\n') {
-			if(parsemagdatastring(buff,&trk)){
-				write(fd,&trk,sizeof(struct trkrec));
-				reccount++;
-			}
-			j=0;
-			memset(buff,0,PUFFSIZE);
+	for(pdb_rec = pdb->rec_index.rec; pdb_rec; pdb_rec=pdb_rec->next) {
+	
+		if(parsemagdatastring((char*)pdb_rec->data,&trk)){
+			write(fd,&trk,sizeof(struct trkrec));
+			reccount++;
 		}
 	}
 	lseek(fd,sizeof(struct maghead)+sizeof(len)+len,SEEK_SET);
 	write(fd,&reccount,sizeof(int));
 }
 
+#define AppId                   'Mag1'
+#define Data                    'DATA'
+
 int main(int argcount,char* arg[]){ /*{{{1*/
 	struct stat sta;
 	int fd,fd2;
-	void *ptr;
-	char* defname="MacCon";
-	char* name;
+	char *defname="MacCon";
+	char *name;
+	struct pdb *pdb;
 
 	memset(&sta,0,sizeof(struct stat));
 	if(argcount>=4){name=arg[3];} else {name=defname;}
-	
+
 	if (argcount>=3){
 		if(stat(arg[1],&sta)==0 && S_ISREG(sta.st_mode)){
-			fd=open(arg[1],O_RDONLY);		
+			fd=open(arg[1],O_RDONLY);
 			if(fd!=-1){
-				ptr=mmap(0,sta.st_size,PROT_READ,MAP_PRIVATE,fd,0);
-				if(ptr!=MAP_FAILED){
-					fd2=open(arg[2],O_WRONLY|O_CREAT|O_NOCTTY|O_TRUNC|O_BINARY,S_IRUSR|S_IWUSR);
-					if(fd2!=-1){
-						parsemagconfile(ptr,sta.st_size,fd2,name);
-						close(fd2);
-						
-					} else {
-						perror(NULL);
-					}
-					munmap(ptr,sta.st_size);
+				if (NULL == (pdb = pdb_Read(fd))) {
+					printf("Could not read pdbfile.\n");
+					close(fd);
+					return 1;
+				}
+
+				if ((pdb->creator != AppId) || (pdb->type != Data)) {
+					printf("Not a MagCon file.\n");
+					close(fd);
+					return 1;
+				}
+
+				fd2=open(arg[2],O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,S_IRUSR|S_IWUSR);
+				if(fd2!=-1){
+					parsemagconfile(pdb,fd2,name);
+					close(fd2);
+
 				} else {
 					perror(NULL);
 				}
-				close(fd);
-			} else {
-				perror(NULL);
 			}
+			close(fd);
+		} else {
+			perror(NULL);
 		}
 	} else {
 		printf("\nUsage: %s <inputfile> <ouputfile> [Trackname]\n\n",arg[0]);
