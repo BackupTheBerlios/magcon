@@ -1,0 +1,15 @@
+MagCon Readme
+
+1. Please read and accept the license.
+2. Install MagCon using your favorite synctool.
+3. Start it and follow the onscreen instructions.
+4. After downloading a track, MagCon exports it to the memopad application.
+5. You can convert the downloaded track to Magellan MapSend format using the 2mag tool which is included in this package.
+
+
+2mag Readme
+
+In a cmd-shell (also known as "Dos Box") run "2mag memofile mapsendfile trackname"
+
+
+Visit http://www.hansche.de/magcon to look for updates.

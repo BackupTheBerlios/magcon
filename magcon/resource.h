@@ -1,0 +1,10 @@
+#define MainMenu		1000
+#define HelpMenuAbout		1010
+#define	MainMenuGetId		1011
+#define	MainMenuGetTrack	1012
+#define MainForm		1100
+#define AboutAlert		2000
+#define BTN_ID			3000
+#define BTN_TRK			3002
+#define ALM_DLG1		4000
+#define FLD_MAIN		5000

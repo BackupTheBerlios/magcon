@@ -1,0 +1,42 @@
+#include "resource.h"
+VERSION ID 1 "0.80"
+
+MENU ID MainMenu
+BEGIN
+	PULLDOWN "Action"
+	BEGIN
+		MENUITEM "Get Id" ID MainMenuGetId
+		MENUITEM "Get Track" ID MainMenuGetTrack
+	END
+	PULLDOWN "Help"
+	BEGIN
+		MENUITEM "About..." ID HelpMenuAbout
+	END
+END
+
+FORM MainForm AT (0 0 160 160)
+	MENUID MainMenu
+	USABLE
+BEGIN
+	TITLE "MagCon"
+	FIELD ID FLD_MAIN AT (2 15 155 100) USABLE NONEDITABLE MULTIPLELINES MAXCHARS 250
+	BUTTON "Get Id" ID BTN_ID AT (2 130 AUTO AUTO)
+	BUTTON "Get Track" ID BTN_TRK AT (2 PREVBOTTOM+4 AUTO AUTO)
+END
+
+ALERT ID AboutAlert
+BEGIN
+	TITLE "About..."
+	MESSAGE "MagellanConnect\nVersion 1.00\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
+	BUTTONS "OK"
+END
+
+ALERT ID ALM_DLG1
+WARNING
+BEGIN
+	TITLE "Alert"
+	MESSAGE "^1\n^2\n^3"
+	BUTTONS "OK"
+END
+
+ICON "icon.bmp"
