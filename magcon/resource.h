@@ -11,6 +11,7 @@
 #define NameForm		1101
 #define DelDbForm		1102
 #define AboutAlert		2000
+#define DeleteAlert		2001
 #define BTN_ID			3000
 #define BTN_TRK			3002
 #define BTN_WPT			3003
