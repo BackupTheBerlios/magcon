@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.10 2003/10/05 10:17:52 niki Exp $ */
+/* $Id: main.c,v 1.11 2003/10/05 10:19:06 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -12,6 +12,7 @@
 typedef struct{
 	UInt32 baud;
 	UInt32 timeout;
+	UInt32 action;
 } apppref;
 
 
@@ -23,6 +24,15 @@ apppref pref;
 UInt16 prefsize;
 
 /* Functions */
+
+UInt32 get_lst(const UInt16 lst_const){
+	ListType *lst;
+
+	lst=FrmGetObjectPtr(gpForm, FrmGetObjectIndex(gpForm, lst_const));
+	if(!lst) return 0;
+	
+	return LstGetSelection(lst);
+}
 
 UInt32 get_lst_int(const UInt16 lst_const,const UInt32 def){
 	ListType *lst;
@@ -73,23 +83,9 @@ void set_lst_int(const UInt16 lst_const, const UInt32 val){
 	else if(lst_const==LST_TIMEOUT){
 		switch(val){
 			case 3:  set_lst(lst_const,0); break;
-			case 4:  set_lst(lst_const,1); break;
-			case 5:  set_lst(lst_const,2); break;
-			case 6:  set_lst(lst_const,3); break;
-			case 7:  set_lst(lst_const,4); break;
-			case 8:  set_lst(lst_const,5); break;
-			case 9:  set_lst(lst_const,6); break;
-			case 10:  set_lst(lst_const,7); break;
-			case 11:  set_lst(lst_const,8); break;
-			case 12:  set_lst(lst_const,9); break;
-			case 13:  set_lst(lst_const,10); break;
-			case 14:  set_lst(lst_const,11); break;
-			case 15:  set_lst(lst_const,12); break;
-			case 16:  set_lst(lst_const,13); break;
-			case 17:  set_lst(lst_const,14); break;
-			case 18:  set_lst(lst_const,15); break;
-			case 19:  set_lst(lst_const,16); break;
-			case 20:  set_lst(lst_const,17); break;
+			case 10:  set_lst(lst_const,1); break;
+			case 20:  set_lst(lst_const,2); break;
+			case 50:  set_lst(lst_const,3); break;
 				 
 		}
 	} 
@@ -106,6 +102,7 @@ static Err StartApplication()
 	if(PrefGetAppPreferences(AppId,1,&pref,&prefsize,false)==noPreferenceFound){
 		pref.baud=4800;
 		pref.timeout=3;
+		pref.action=0;
 	}
 	
 	err=SysLibFind("Serial Library",&serlib);
@@ -122,6 +119,7 @@ static void StopApplication()
 {
 	pref.baud=get_lst_int(LST_BAUD,4800);
 	pref.timeout=get_lst_int(LST_TIMEOUT,3);
+	pref.action=get_lst(LST_ACTION);
 	PrefSetAppPreferences(AppId,1,1,&pref,sizeof(pref),false);
 	FrmCloseAllForms();
 }
@@ -145,7 +143,7 @@ Boolean MainFormEventHandler(EventPtr event)
 	
 					   set_lst_int(LST_BAUD,pref.baud);
 					   set_lst_int(LST_TIMEOUT,pref.timeout);
-					   set_lst(LST_ACTION,0);
+					   set_lst(LST_ACTION,pref.action);
 					   break;
 				   }
 
