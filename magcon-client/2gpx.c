@@ -1,4 +1,4 @@
-/* $Id: 2gpx.c,v 1.3 2003/02/24 18:12:11 niki Exp $ */
+/* $Id: 2gpx.c,v 1.4 2003/08/24 12:48:30 niki Exp $ */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -62,10 +62,10 @@ static int parsemagdatastring(const char *data, struct trkrec *trk){ /*{{{1*/
 				case  5: if(strncmp("W",puff,1)==0){trk->x=-trk->x;} break;
 				case  6: trk->altitude=atof(puff); break;
 				case  8: memset(&tm,0,sizeof(struct tm));
-					 sscanf(puff,"%2i%2i%2i.%2hi",&tm.tm_hour,&tm.tm_min,&tm.tm_sec,(short int*)&trk->centisecs);
+					 sscanf(puff,"%2u%2u%2u.%2hu",&tm.tm_hour,&tm.tm_min,&tm.tm_sec,(short int*)&trk->centisecs);
 					 break;
 				case  9: trk->validity=!strncmp("A",puff,1); ret=1; break;
-				case 11: sscanf(puff,"%2i%2i%2i",&tm.tm_mday,&tm.tm_mon,&tm.tm_year);
+				case 11: sscanf(puff,"%2u%2u%2u",&tm.tm_mday,&tm.tm_mon,&tm.tm_year);
 					 tm.tm_mon-=1;
 					 tm.tm_year+=100;
 					 trk->time=mktime(&tm); 
