@@ -1,11 +1,11 @@
-/* $Id: ser.c,v 1.1 2003/02/02 10:41:16 niki Exp $ */
+/* $Id: ser.c,v 1.2 2003/02/06 20:01:05 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
 #include "magellan.h"
 #include "resource.h"
 
 UInt16 serlib;
-UInt16 timeoutdiv=5;
+UInt16 timeoutdiv=3;
 
 Boolean ser_open(void){
 	SerSettingsType portSettings;
@@ -108,7 +108,6 @@ Boolean send_string(char* str,Boolean ack){
 		if(err1<0){
 			FrmCustomAlert(ALM_DLG1,"Stringerror"," "," ");
 		} else {
-			/*FrmCustomAlert(ALM_DLG1,"Sendstring",sndstr," ");*/
 			SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
 			count=SerSend(serlib,sndstr,StrLen(sndstr),&err);
 			if(!err){
