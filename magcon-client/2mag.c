@@ -1,4 +1,4 @@
-/* $Id: 2mag.c,v 1.3 2003/02/08 13:32:37 niki Exp $ */
+/* $Id: 2mag.c,v 1.4 2003/02/17 14:58:08 niki Exp $ */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -12,13 +12,13 @@
 #include "coldsync/pdb.h"
 
 #define PUFFSIZE 256
+#define AppId                   'Mag1'
+#define Data                    'DATA'
 
 /*Cygwin hack*/
 #if !defined(O_BINARY)
 	#define O_BINARY 0
 #endif
-
-
 
 static double mag2degrees(double mag_val) /*{{{1*/
 {
@@ -109,9 +109,6 @@ void parsemagconfile(struct pdb *pdb, const int fd, const char* fname){ /*{{{1*/
 	lseek(fd,sizeof(struct maghead)+sizeof(len)+len,SEEK_SET);
 	write(fd,&reccount,sizeof(int));
 }
-
-#define AppId                   'Mag1'
-#define Data                    'DATA'
 
 int main(int argcount,char* arg[]){ /*{{{1*/
 	struct stat sta;
