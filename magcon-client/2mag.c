@@ -1,9 +1,8 @@
+/* $Id: 2mag.c,v 1.2 2003/02/03 16:23:53 niki Exp $ */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <unistd.h>
 #include <fcntl.h>
-/* $Id: 2mag.c,v 1.1 2003/02/02 10:43:47 niki Exp $ */
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
@@ -12,6 +11,13 @@
 #include "mag.h"
 
 #define PUFFSIZE 256
+
+/*Cygwin hack*/
+#if !defined(O_BINARY)
+	#define O_BINARY 0
+#endif
+
+
 
 static double mag2degrees(double mag_val) /*{{{1*/
 {
@@ -125,7 +131,7 @@ int main(int argcount,char* arg[]){ /*{{{1*/
 			if(fd!=-1){
 				ptr=mmap(0,sta.st_size,PROT_READ,MAP_PRIVATE,fd,0);
 				if(ptr!=MAP_FAILED){
-					fd2=open(arg[2],O_WRONLY|O_CREAT|O_NOCTTY|O_TRUNC,S_IRUSR|S_IWUSR);
+					fd2=open(arg[2],O_WRONLY|O_CREAT|O_NOCTTY|O_TRUNC|O_BINARY,S_IRUSR|S_IWUSR);
 					if(fd2!=-1){
 						parsemagconfile(ptr,sta.st_size,fd2,name);
 						close(fd2);
