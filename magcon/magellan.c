@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.8 2003/02/24 18:10:25 niki Exp $ */
+/* $Id: magellan.c,v 1.9 2003/02/28 14:47:51 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -74,7 +74,7 @@ static char* input_name(void){
 	static char name[16];
 	char* tmp;
 	
-	MemSet(name,0,16);
+	MemSet(name,16,0);
 	frmP = FrmInitForm(NameForm);
 	fld=FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, FLD_NAME));
 	FrmSetFocus(frmP, FrmGetObjectIndex(frmP, FLD_NAME));
