@@ -1,5 +1,5 @@
 #include "resource.h"
-VERSION ID 1 "0.93"
+VERSION ID 1 "0.94"
 APPLICATION ID 1 "Mag1"
 
 MENU ID MainMenu
@@ -8,7 +8,6 @@ BEGIN
 	BEGIN
 		MENUITEM "Get Id" ID MainMenuGetId "i"
 		MENUITEM "Get Track" ID MainMenuGetTrack "t"
-		MENUITEM "Get Waypoints" ID MainMenuGetWaypts "w"
 	END
 	PULLDOWN "DB"
 	BEGIN
@@ -37,7 +36,6 @@ BEGIN
 	POPUPLIST ID TRIG_TIMEOUT LST_TIMEOUT
 	BUTTON "Get Id" ID BTN_ID AT (2 130 AUTO AUTO)
 	BUTTON "Get Track" ID BTN_TRK AT (2 PREVBOTTOM+4 AUTO AUTO)
-	BUTTON "Get Waypts" ID BTN_WPT AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
 END
 
 FORM ID NameForm AT (1 90 158 69)
@@ -65,7 +63,7 @@ END
 ALERT ID AboutAlert
 BEGIN
 	TITLE "About..."
-	MESSAGE "MagellanConnect\nVersion 0.93\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
+	MESSAGE "MagellanConnect\nVersion 0.94\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
 	BUTTONS "OK"
 END
 
