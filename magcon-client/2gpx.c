@@ -1,4 +1,4 @@
-/* $Id: 2gpx.c,v 1.1 2003/02/18 17:26:57 niki Exp $ */
+/* $Id: 2gpx.c,v 1.2 2003/02/18 18:07:26 niki Exp $ */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -80,14 +80,14 @@ static int parsemagdatastring(const char *data, struct trkrec *trk){ /*{{{1*/
         return ret;
 }
 
-void parsemagconfile(struct pdb *pdb, const int fd, const char* fname){ /*{{{1*/
+void parsemagconfile(struct pdb *pdb, const int fd){ /*{{{1*/
 	struct trkrec trk;
 	int reccount;
         struct pdb_record *pdb_rec;
 	char buff[1024];
 	char buff2[1024];
 	char *gpxhead="<?xml version=\"1.0\"?>\n<gpx version=\"1.0\" creator=\"MagCon 2gpx exporter - http://www.hansche.de/magcon\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.topografix.com/GPX/1/0\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n<trk>\n<trkseg>\n";
-	char *gpxfoot="</trkseg></trk></gpx>";
+	char *gpxfoot="</trkseg></trk></gpx>\n";
 	char *trkpt="<trkpt lat=\"%f\" lon=\"%f\">\n\t<ele>%f</ele>\n\t<time>%s.%dZ</time>\n</trkpt>\n";
 	reccount=0;
 
@@ -111,14 +111,11 @@ void parsemagconfile(struct pdb *pdb, const int fd, const char* fname){ /*{{{1*/
 int main(int argcount,char* arg[]){ /*{{{1*/
 	struct stat sta;
 	int fd,fd2;
-	char *defname="MacCon";
-	char *name;
 	struct pdb *pdb;
 
 	memset(&sta,0,sizeof(struct stat));
-	if(argcount>=4){name=arg[3];} else {name=defname;}
 
-	if (argcount>=3){
+	if (argcount>=2){
 		if(stat(arg[1],&sta)==0 && S_ISREG(sta.st_mode)){
 			fd=open(arg[1],O_RDONLY);
 			if(fd!=-1){
@@ -134,9 +131,9 @@ int main(int argcount,char* arg[]){ /*{{{1*/
 					return 1;
 				}
 
-				fd2=open(arg[2],O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,S_IRUSR|S_IWUSR);
+				fd2=argcount>=3?open(arg[2],O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,S_IRUSR|S_IWUSR):STDIN_FILENO;
 				if(fd2!=-1){
-					parsemagconfile(pdb,fd2,name);
+					parsemagconfile(pdb,fd2);
 					close(fd2);
 
 				} else {
@@ -148,7 +145,7 @@ int main(int argcount,char* arg[]){ /*{{{1*/
 			perror(NULL);
 		}
 	} else {
-		printf("\nUsage: %s <inputfile> <ouputfile> [Trackname]\n\n",arg[0]);
+		printf("\nUsage: %s <inputfile> [<ouputfile>] \n\n",arg[0]);
 	}
 
 	return 0;
