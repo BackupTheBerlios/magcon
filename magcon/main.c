@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.1 2003/02/02 10:41:16 niki Exp $ */
+/* $Id: main.c,v 1.2 2003/02/02 12:22:53 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -76,7 +76,7 @@ static void get_mag_id(void){
                         get_field(msg,field,512,4);
                         StrCat(field,"  ");
                         get_field(msg,field+StrLen(field),512-StrLen(field),3);
-                        WinDrawChars(field,StrLen(field),2,101);
+                        WinDrawChars(field,StrLen(field),2,105);
 		} else {
 			FrmCustomAlert(ALM_DLG1,"Could not get Magellan ID"," "," ");
 		}
