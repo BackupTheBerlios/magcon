@@ -1,4 +1,4 @@
-/* $Id: deldb.c,v 1.3 2003/02/09 11:39:30 niki Exp $ */
+/* $Id: deldb.c,v 1.4 2003/02/15 18:07:57 niki Exp $ */
 #include <PalmOS.h>
 #include <DataMgr.h>
 #include <List.h>
@@ -47,17 +47,29 @@ void filllist(void){
 Boolean db_evt_handler(EventPtr eventP){
 	Boolean handled = false;
 	char *name;
-
-	if ((eventP->eType == ctlSelectEvent) && (eventP->data.ctlSelect.controlID == BTN_DEL_DB)) {
+	UInt16 newdbattr=dmHdrAttrBackup;
+	
+	if (eventP->eType == ctlSelectEvent){
 		name=LstGetSelectionText(lst,LstGetSelection(lst));	
-		if(name && 0==FrmCustomAlert(DeleteAlert,name," "," ")){
-			DmDeleteDatabase(0,DmFindDatabase(0,name));
+		switch (eventP->data.ctlSelect.controlID){
+			case BTN_DEL_DB:
+				if(name && 0==FrmCustomAlert(DeleteAlert,name," "," ")){
+					DmDeleteDatabase(0,DmFindDatabase(0,name));
+				}
+				freedblist();
+				filllist();
+				LstDrawList(lst);
+				handled=true;
+				break;
+			case BTN_BCK_DB:
+				if(name){
+					DmSetDatabaseInfo(0,DmFindDatabase(0,name),NULL,&newdbattr,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+				}
+				handled=true;
+				break;
 		}
-		freedblist();
-		filllist();
-		LstDrawList(lst);
-		handled=true;
 	}
+
 	return handled;
 }
 

@@ -1,5 +1,5 @@
 #include "resource.h"
-VERSION ID 1 "0.91"
+VERSION ID 1 "0.92"
 
 MENU ID MainMenu
 BEGIN
@@ -45,13 +45,14 @@ BEGIN
 	LABEL "Mark the DB to delete" AUTOID AT (7 20)
 	LIST ""  ID LST_DBLST AT (7 PREVBOTTOM+4 140 80)
 	BUTTON "Delete" ID BTN_DEL_DB AT (5 BOTTOM@145 AUTO AUTO)
-	Button "Cancel" AUTOID AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+	BUTTON "Backup" ID BTN_BCK_DB AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
+	BUTTON "Cancel" AUTOID AT (PREVRIGHT+4 PREVTOP AUTO AUTO)
 END
 
 ALERT ID AboutAlert
 BEGIN
 	TITLE "About..."
-	MESSAGE "MagellanConnect\nVersion 0.91\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
+	MESSAGE "MagellanConnect\nVersion 0.92\n\nCopyright \251 2003\nKlaus-Martin Hansche\n"
 	BUTTONS "OK"
 END
 

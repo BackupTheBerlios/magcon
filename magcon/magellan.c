@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.4 2003/02/11 16:10:26 niki Exp $ */
+/* $Id: magellan.c,v 1.5 2003/02/15 18:07:57 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -208,6 +208,7 @@ void mag_get_data(msgtype msgt){
 	LocalID dbid;
 	DmOpenRef dbref;
 	UInt16 vers=DbVers;
+	UInt16 newdbattr=dmHdrAttrBackup;
 
 	while (StrLen(t)==0) t=input_name();
 
@@ -222,7 +223,7 @@ void mag_get_data(msgtype msgt){
 		return;
 	}
 	
-	DmSetDatabaseInfo(0,dbid,NULL,NULL,&vers,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+	DmSetDatabaseInfo(0,dbid,NULL,&newdbattr,&vers,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 	
 	dbref=DmOpenDatabase(0,dbid,dmModeWrite|dmModeExclusive);
 	if(dbref==NULL){

@@ -16,6 +16,7 @@
 #define BTN_TRK			3002
 #define BTN_WPT			3003
 #define BTN_DEL_DB		3004
+#define BTN_BCK_DB		3005
 #define ALM_DLG1		4000
 #define INF_DLG1		4001
 #define FLD_MAIN		5000
