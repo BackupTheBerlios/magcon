@@ -7,9 +7,7 @@
 #define PDBSIZE 65537
 
 void usage() {
-    fprintf(stderr,"Usage: mag2pdb <file> [<pdb-file>|-]
-  Translates an ASCII file with Magellan track, route, and waypoint information
-  into a PDB database for the Palm.\n");
+    fprintf(stderr,"Usage: mag2pdb <file> [<pdb-file>|-] Translates an ASCII file with Magellan track, route, and waypoint information into a PDB database for the Palm.\n");
 }
 
 put2b(unsigned char *ptr, unsigned int val) {

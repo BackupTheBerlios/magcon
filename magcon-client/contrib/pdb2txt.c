@@ -4,10 +4,7 @@
 #define PDBSIZE 65537
 
 void usage() {
-    fprintf(stderr,"Usage: pdb2txt pdbfile [<outfile>|-]
-  Converts a Palm PDB database consisting of text lines into a text file.
-  If no outfile name is specified, the name is constructed from the 
-  PDB file name. If '-', stdout is used.\n");
+    fprintf(stderr,"Usage: pdb2txt pdbfile [<outfile>|-] Converts a Palm PDB database consisting of text lines into a text file.  If no outfile name is specified, the name is constructed from the PDB file name. If '-', stdout is used.\n");
 }
 
 int main(int argc, char **argv) {
