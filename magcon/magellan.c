@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.2 2003/02/08 11:13:03 niki Exp $ */
+/* $Id: magellan.c,v 1.3 2003/02/10 17:25:35 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -140,6 +140,8 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 	char msg[1024];
 	char field[512];
 	char chk[3];
+	UInt16 timeout;
+	
 	Boolean done,complete;
 	ProgressPtr progptr;
 	UInt16 msgcount;
@@ -163,6 +165,7 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 	if(!send_string(msr,true)){ send_string(handoff,true); ser_close(); return false;}
 	
 	/* The real McCoy - Get everything the Magellan wants to give */
+	timeout=SysSetAutoOffTime(0);
 	progptr=PrgStartDialogV31(msr,progress_cb);
 	while(!done && progptr){
 		MemSet(msg,1024,0);
@@ -189,8 +192,10 @@ static Boolean get_data(msgtype type, DmOpenRef dbref){
 			done=true;
 		}
 	}
+	SysSetAutoOffTime(timeout);
 	send_string(handoff,true);
 	SerReceiveFlush(serlib,SysTicksPerSecond()/2);
+	
 	if(progptr){PrgStopDialog(progptr,false);}
 	ser_close();
 	

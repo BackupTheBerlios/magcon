@@ -1,6 +1,7 @@
-/* $Id: ser.c,v 1.2 2003/02/06 20:01:05 niki Exp $ */
+/* $Id: ser.c,v 1.3 2003/02/10 17:25:35 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
+#include <StringMgr.h>
 #include "magellan.h"
 #include "resource.h"
 
@@ -19,11 +20,13 @@ Boolean ser_open(void){
 	}
 	SerGetSettings(serlib,&portSettings);
 	portSettings.baudRate=4800;
-	portSettings.flags=(serSettingsFlagStopBits1 |	serSettingsFlagBitsPerChar8 | serSettingsFlagRTSAutoM);
+	portSettings.flags=(serSettingsFlagStopBits1 |	serSettingsFlagBitsPerChar8 );//| serSettingsFlagRTSAutoM);
 	SerSetSettings(serlib,&portSettings);
 
 	SerSendFlush(serlib);
 
+	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
+	SerSendFlush(serlib);
 	SerReceiveFlush(serlib,SysTicksPerSecond()/timeoutdiv);
 
 	return true;
@@ -49,7 +52,7 @@ Boolean get_string(char* string,UInt16 size){
 	char* puffer;
 	UInt16 minsize;
 	UInt16 timeout;
-
+	
 	ret=false;
 	bytetran=0;
 
@@ -62,10 +65,11 @@ Boolean get_string(char* string,UInt16 size){
 	if(puffer){
 		MemSet(puffer,size,0);
 		err=SerReceiveWait(serlib,minsize,timeout);
+		if(err) error_dlg(err);
 		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
 		err=SerReceiveCheck(serlib,&numbytes);
+		if(err) error_dlg(err);
 		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-
 		if(numbytes<size){
 			bytetran=SerReceive(serlib,puffer,size-1,timeout,&err);
 			/*FrmCustomAlert(ALM_DLG1,puffer," "," ");*/
