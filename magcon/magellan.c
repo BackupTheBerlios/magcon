@@ -1,4 +1,4 @@
-/* $Id: magellan.c,v 1.7 2003/02/19 20:58:17 niki Exp $ */
+/* $Id: magellan.c,v 1.8 2003/02/24 18:10:25 niki Exp $ */
 #include <PalmOS.h>
 #include <Progress.h>
 #include <DataMgr.h>
@@ -215,7 +215,8 @@ void mag_get_data(msgtype msgt){
 	UInt16 vers=DbVers;
 	UInt16 newdbattr=dmHdrAttrBackup;
 
-	while (StrLen(t)==0) t=input_name();
+	t=input_name();
+	if(StrLen(t)==0){return;}
 
 	if(DmCreateDatabase(0,t,AppId,Data,false)!=errNone){ 
 		FrmCustomAlert(ALM_DLG1,"Could not create Database!"," "," ");

@@ -1,4 +1,4 @@
-/* $Id: ser.c,v 1.6 2003/02/19 20:58:17 niki Exp $ */
+/* $Id: ser.c,v 1.7 2003/02/24 18:10:25 niki Exp $ */
 #include <PalmOS.h>
 #include <SerialMgrOld.h>
 #include <StringMgr.h>
@@ -50,14 +50,11 @@ void error_dlg(Err err){
 Boolean get_string(char* string,UInt16 size){
 	Err err;
 	Boolean ret;
-	UInt32 numbytes;
 	UInt32 bytetran;
 	char* puffer;
-	char puff[maxStrIToALen];
-	char puff2[maxStrIToALen];
-	char puff3[maxStrIToALen];
 	UInt16 minsize;
 	UInt16 timeout;
+	UInt16 maxret=5;
 	
 	ret=false;
 	bytetran=0;
@@ -70,19 +67,11 @@ Boolean get_string(char* string,UInt16 size){
 	puffer=(char*) MemPtrNew(size);
 	if(puffer){
 		MemSet(puffer,size,0);
-		while ((err=SerReceiveWait(serlib,minsize,timeout))==serErrTimeOut);
+		while ((err=SerReceiveWait(serlib,minsize,SysTicksPerSecond()))==serErrTimeOut && maxret-->=1);
 		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-		err=SerReceiveCheck(serlib,&numbytes);
+		bytetran=SerReceive(serlib,puffer,size-1,timeout,&err);
+		/*FrmCustomAlert(ALM_DLG1,puffer," "," ");*/
 		if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-		/*if(numbytes<size){*/
-			bytetran=SerReceive(serlib,puffer,size-1,timeout,&err);
-			/*FrmCustomAlert(ALM_DLG1,puffer," "," ");*/
-			if(err && err!=serErrTimeOut){ error_dlg(err);goto end;}
-		/*} else {
-			bytetran=SerReceive(serlib,puff3,maxStrIToALen,timeout,&err);
-			FrmCustomAlert(ALM_DLG1,puff3,StrIToA(puff,numbytes),StrIToA(puff2,size));
-		}*/
-
 		if(bytetran>0 && puffer[bytetran-1]=='\n'){
 			StrNCopy(string,puffer,size); /*puffer includes trailing \0*/
 			ret=true;

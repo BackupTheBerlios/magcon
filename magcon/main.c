@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.8 2003/02/19 20:58:17 niki Exp $ */
+/* $Id: main.c,v 1.9 2003/02/24 18:10:25 niki Exp $ */
 #include <PalmOS.h>
 #include <Window.h>
 #include <ExgMgr.h>
@@ -41,6 +41,7 @@ UInt32 get_lst_int(const UInt16 lst_const,const UInt32 def){
 
 void set_lst(const UInt16 lst_const,const UInt16 val){
 	ListType *lst;
+	ControlPtr trg; 
 
 	lst=FrmGetObjectPtr(gpForm, FrmGetObjectIndex(gpForm, lst_const));
 	if(lst){
@@ -48,6 +49,13 @@ void set_lst(const UInt16 lst_const,const UInt16 val){
 		LstMakeItemVisible(lst,val);
 		LstDrawList(lst);
 	}
+	
+	/*ATTN: Ugly hack: lst_const+1 means that the popuptrigger has to have LIST-ID plus one!*/
+	trg=(ControlPtr) FrmGetObjectPtr(gpForm, FrmGetObjectIndex(gpForm, lst_const+1));
+	if(trg && lst){
+		CtlSetLabel(trg, LstGetSelectionText(lst,val));
+	}
+	
 }
 
 void set_lst_int(const UInt16 lst_const, const UInt32 val){
@@ -75,6 +83,11 @@ void set_lst_int(const UInt16 lst_const, const UInt32 val){
 			case 13:  set_lst(lst_const,10); break;
 			case 14:  set_lst(lst_const,11); break;
 			case 15:  set_lst(lst_const,12); break;
+			case 16:  set_lst(lst_const,13); break;
+			case 17:  set_lst(lst_const,14); break;
+			case 18:  set_lst(lst_const,15); break;
+			case 19:  set_lst(lst_const,16); break;
+			case 20:  set_lst(lst_const,17); break;
 				 
 		}
 	}

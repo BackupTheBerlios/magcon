@@ -8,7 +8,8 @@ Usage:
 1. Please read and accept the license.
 2. Install MagCon using your favorite synctool.
 3. Start it and follow the onscreen instructions.
-5. You can convert the downloaded track to Magellan MapSend format using the 2mag tool which is included in this package.
+4. Timeout means interbyte timeout. The higher the value the faster the communication.
+5. You can convert the downloaded track to Magellan MapSend or other formats using the 2mag and 2gpx tool which are included in this package.
 
 
 2mag Readme
@@ -16,10 +17,14 @@ Usage:
 After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
 In a cmd-shell (also known as "Dos Box") run "2mag track.pdb mapsendfile trackname" where trackname is the name you want to show up in MapSend.
 
+2gpx Readme
 
+After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
+In a cmd-shell (also known as "Dos Box") run "2gpx track track.pdb track.gpx" to create a gpx-tracklog.
+Use "2gpx csv track.pdb track.csv" to ouput data in cvs-format
 
 
 Visit http://www.hansche.de/magcon to look for updates.
 You can reach me under magcon@hansche.de
 
-$Id: README,v 1.3 2003/02/09 14:54:13 niki Exp $
+$Id: README,v 1.4 2003/02/24 18:10:25 niki Exp $
