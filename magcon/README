@@ -1,30 +1,13 @@
 MagCon Readme
 
-MagCon reads tracks from your Magellan GPS. 
-Waypoints are read as well, but can't be exported at the moment.
+MagCon reads and writes tracks, routes and waypoints from and to your Magellan GPS. 
 It was tested on a SporTrak Pro, but should work on all SporTraks, all Meridians and the 315. If it doesn't, or works on another device please contact me.
 
 Usage:
 1. Please read and accept the license.
-2. Install MagCon using your favorite synctool.
+2. Install MagCon using your favourite synctool.
 3. Start it and follow the onscreen instructions.
 4. Timeout means interbyte timeout. The higher the value the faster the communication.
-5. You can convert the downloaded track to Magellan MapSend or other formats using the 2mag and 2gpx tool which are included in this package.
+5. You can convert the downloaded track to Magellan MapSend or other formats using the magcon-client tools which are available as a separate package. There are also tools to convert routes and waypoints to a format that can be used by GPSBabel (http://gpsbabel.sourceforge.net/)
 
-
-2mag Readme
-
-After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
-In a cmd-shell (also known as "Dos Box") run "2mag track.pdb mapsendfile trackname" where trackname is the name you want to show up in MapSend.
-
-2gpx Readme
-
-After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
-In a cmd-shell (also known as "Dos Box") run "2gpx track track.pdb track.gpx" to create a gpx-tracklog.
-Use "2gpx csv track.pdb track.csv" to ouput data in cvs-format
-
-
-Visit http://www.hansche.de/magcon to look for updates.
-You can reach me under magcon@hansche.de
-
-$Id: README,v 1.4 2003/02/24 18:10:25 niki Exp $
+$Id: README,v 1.5 2003/12/25 10:35:03 loxley Exp $

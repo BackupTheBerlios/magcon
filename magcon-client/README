@@ -1,1 +1,20 @@
-Please see the MagCon-Readme
+2mag Readme
+
+After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
+In a cmd-shell (also known as "Dos Box") run "2mag track.pdb mapsendfile trackname" where trackname is the name you want to show up in MapSend.
+
+2gpx Readme
+
+After syncing your Palm locate then file named track.pdb (substitue "track" with the trackname you chose).
+In a cmd-shell (also known as "Dos Box") run "2gpx track track.pdb track.gpx" to create a gpx-tracklog.
+Use "2gpx csv track.pdb track.csv" to ouput data in cvs-format
+
+Mag2pdb Readme
+
+Mag2pdb converts MagCon PDBs into a textfile that can be read by GPSBabel (http://gpsbabel.sourceforge.net/). At this moment mag2pdb is the only client, that can extract waypoints and routes.
+
+Visit http://www.hansche.de/magcon to look for updates.
+There is a maillinglist called Magcon-announce, please go to https://lists.berlios.de/mailman/listinfo/magcon-announce to subscribe.
+You can reach me under magcon@hansche.de
+
+$Id: README,v 1.2 2003/12/25 10:35:25 loxley Exp $
