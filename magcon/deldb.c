@@ -1,3 +1,4 @@
+/* $Id: deldb.c,v 1.3 2003/02/09 11:39:30 niki Exp $ */
 #include <PalmOS.h>
 #include <DataMgr.h>
 #include <List.h>
