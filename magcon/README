@@ -1,5 +1,8 @@
 MagCon Readme
 
+MagCon reads tracks from your Magellan GPS and exports them to memopad. It was tested on a SporTrak Pro, but should work on all SporTraks, all Meridians and the 315. If it doesn't, or works on another device please contact me.
+
+Usage:
 1. Please read and accept the license.
 2. Install MagCon using your favorite synctool.
 3. Start it and follow the onscreen instructions.
@@ -13,3 +16,6 @@ In a cmd-shell (also known as "Dos Box") run "2mag memofile mapsendfile tracknam
 
 
 Visit http://www.hansche.de/magcon to look for updates.
+You can reach me under magcon@hansche.de
+
+$Id: README,v 1.2 2003/02/02 11:09:50 niki Exp $
