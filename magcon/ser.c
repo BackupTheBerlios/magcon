@@ -1,4 +1,4 @@
-/* $Id: ser.c,v 1.9 2004/05/23 17:09:05 loxley Exp $ */
+/* $Id: ser.c,v 1.10 2005/09/04 07:06:59 loxley Exp $ */
 #include <PalmOS.h>
 #include <SerialMgr.h>
 #include <StringMgr.h>
@@ -14,12 +14,14 @@ Boolean send_string(char* str,Boolean ack);
 Boolean ser_open(void){
 	/*SerSettingsType portSettings;*/
 	UInt16 timeoutdiv;
+	char errpuff[512];
 	Err err;
 	
 	timeoutdiv=get_lst_int(LST_TIMEOUT,3);
-	err=SrmOpen(serPortCradlePort, get_lst_int(LST_BAUD,4600),&serlib);
+	err=SrmOpen(serPortCradleRS232Port, get_lst_int(LST_BAUD,4600),&serlib);
 	if(err){
-		FrmCustomAlert(ALM_DLG1,"Could not open serial port!"," "," ");
+		SysErrString(err,errpuff,512);
+		FrmCustomAlert(ALM_DLG1,"Could not open serial port!","System",errpuff);
 		return false;
 	}
 	/*SerGetSettings(serlib,&portSettings);

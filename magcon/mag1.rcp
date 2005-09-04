@@ -1,5 +1,5 @@
 #include "resource.h"
-VERSION ID 1 "0.94"
+VERSION ID 1 "1.00"
 APPLICATION ID 1 "Mag1"
 
 MENU ID MainMenu
@@ -106,7 +106,7 @@ END
 ALERT ID AboutAlert
 BEGIN
 	TITLE "About..."
-	MESSAGE "MagellanConnect\nVersion 0.95\n\nCopyright \251 2003\nKlaus-Martin Hansche"
+	MESSAGE "MagellanConnect\nVersion 1.00\n\nCopyright \251 2003-2005\nKlaus-Martin Hansche"
 	BUTTONS "OK"
 END
 
