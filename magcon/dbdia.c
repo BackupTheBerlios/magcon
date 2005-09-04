@@ -1,4 +1,4 @@
-/* $Id: dbdia.c,v 1.2 2003/10/05 10:17:52 niki Exp $ */
+/* $Id: dbdia.c,v 1.3 2005/09/04 07:16:00 loxley Exp $ */
 #include <PalmOS.h>
 #include <DataMgr.h>
 #include <List.h>
@@ -189,7 +189,7 @@ Boolean db_evt_handler(EventPtr eventP){
 				handled=false;
 				break;
 		        case BTN_INFO_DB:
-			    info_form(name);
+			    if(name) info_form(name);
 			    handled = true;
 			    break;
 		}
